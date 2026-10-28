@@ -1,6 +1,6 @@
 class Order < ApplicationRecord
   belongs_to :restaurant
-  has_many :order_items, dependent: :destroy, index_errors: true
+  has_many :order_items, dependent: :destroy, autosave: true, index_errors: true
   has_many :products, through: :order_items
   has_many :dispatch_attempts, dependent: :destroy
 

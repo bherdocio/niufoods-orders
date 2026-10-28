@@ -5,7 +5,7 @@ class OrderItem < ApplicationRecord
   before_validation :assign_prices
 
   validates :quantity, numericality: { only_integer: true, greater_than: 0 }
-  validates :unit_price, :subtotal, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :unit_price, :subtotal, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
   validates :product_id, uniqueness: { scope: :order_id }
 
   def assign_prices
