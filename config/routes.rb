@@ -14,4 +14,6 @@ Rails.application.routes.draw do
       resources :orders, only: :create
     end
   end
+
+  post "stores/:code/orders", to: "stores/orders#create", as: :store_orders
 end
