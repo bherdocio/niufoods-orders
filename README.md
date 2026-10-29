@@ -261,12 +261,19 @@ Resumen: 16 creadas, 4 rechazadas por validación, 0 con error
 
 ## Dashboard
 
-- Resumen con la cantidad de órdenes por estado de despacho; cada tarjeta filtra el listado.
-- Listado con número, tienda, monto, tipo (Retiro o Delivery), fecha de creación y estado (Pendiente, Enviado o Error).
-- Filtros por estado y por tienda, y paginación de 25 órdenes.
-- Se recarga cada 15 segundos para ver los cambios de estado.
-- Detalle de cada orden con los datos del cliente, los productos y el historial de intentos de despacho.
-- Botón para reintentar el despacho de órdenes con error.
+- **Filtros** por rango de fechas, tienda y estado de despacho. Las fechas y la tienda afectan a todo el dashboard (indicadores, gráficos y listado); el estado filtra solo el listado, para que las tarjetas sigan mostrando el total de cada estado.
+- **Tarjetas por estado** (Pendiente, Enviado y Error); cada una filtra el listado manteniendo las fechas y la tienda elegidas.
+- **Indicadores de ventas:** ventas totales y ticket promedio (ventas totales divididas por la cantidad de órdenes). Consideran todas las órdenes del período, sin importar su estado de despacho.
+- **Gráficos:**
+  - Ventas en el tiempo: por hora si el período abarca hasta 24 horas y por día si es mayor, con ceros en los tramos sin ventas.
+  - Ventas por tienda, con monto y cantidad de órdenes.
+  - Los 5 productos más vendidos por unidades.
+- **Listado** con número, tienda, monto, tipo (Retiro o Delivery), fecha de creación y estado (Pendiente, Enviado o Error), paginado de a 25.
+- **Detalle de cada orden** con los datos del cliente, los productos y el historial de intentos de despacho.
+- **Botón para reintentar** el despacho de órdenes con error.
+- Se recarga cada 30 segundos para ver los cambios de estado.
+
+Los gráficos se dibujan con HTML y CSS desde el servidor, sin JavaScript ni librerías externas.
 
 ## Tests
 
@@ -281,7 +288,9 @@ Los tests no necesitan Redis ni red: Sidekiq corre en modo `fake` y WebMock simu
 - La API: 201 con el despacho encolado, 422 sin persistir nada y 400 con JSON inválido.
 - El despacho: 2xx, 4xx sin reintento, 5xx y timeout reintentables, y el header `Idempotency-Key`.
 - El job: no reenvía órdenes ya enviadas y marca error al agotar los reintentos.
-- El dashboard: listado, filtros, detalle y reintento manual.
+- Los filtros del dashboard: rango de fechas inclusivo, fechas invertidas o inválidas, tienda, y estado aplicado solo al listado.
+- Las estadísticas: ventas por tienda, productos más vendidos, ventas totales, ticket promedio y ventas en el tiempo por hora y por día.
+- El dashboard: listado, filtros, gráficos, detalle y reintento manual.
 
 El CI de GitHub Actions ejecuta RuboCop, Brakeman y la suite de RSpec en cada push.
 
@@ -297,7 +306,8 @@ El CI de GitHub Actions ejecuta RuboCop, Brakeman y la suite de RSpec en cada pu
 - **4xx no se reintenta y 5xx sí.** Un 4xx indica un problema que no se arregla reintentando; un 5xx o un timeout suelen ser transitorios.
 - **`Sidekiq::Job` nativo en vez de ActiveJob**, para usar directamente las opciones de reintento y el callback de reintentos agotados.
 - **Tabla `dispatch_attempts`.** Da trazabilidad de cada intento y alimenta el detalle del dashboard.
-- **Dashboard con ERB y sin JavaScript.** El enunciado permite hacerlo en Rails, y así no hay build de frontend.
+- **Dashboard con ERB y sin JavaScript.** El enunciado permite hacerlo en Rails, y así no hay build de frontend. Los gráficos también son HTML y CSS generados en el servidor.
+- **Filtros y estadísticas en objetos separados.** `Orders::DashboardFilter` interpreta los parámetros y arma las consultas; `Orders::DashboardStats` calcula los indicadores. Las sumas por tienda y por producto se hacen en PostgreSQL con `GROUP BY`.
 
 ## Notas de desarrollo
 
@@ -307,6 +317,7 @@ Problemas que encontré durante el desarrollo y cómo los resolví:
 - **Orden de los callbacks.** El `before_validation` de la orden corre antes que el de sus ítems, así que el total salía en 0. `calculate_total` asigna primero los precios de cada ítem y después suma.
 - **El snapshot de precios no se mantenía.** Un test mostró que, al actualizar el estado de despacho, Rails volvía a validar, recalculaba los precios con el valor actual del producto y los guardaba. Limitar los callbacks a la creación (`on: :create`) lo corrigió.
 - **Redis compartido con otro proyecto.** Sidekiq tomó jobs de otra aplicación local que usaba la misma base de Redis. Ahora el proyecto usa la base 1 por defecto.
+- **El gráfico ignoraba el rango elegido.** Al principio, el eje del gráfico de ventas en el tiempo iba de la primera a la última orden encontrada, así que elegir un rango más amplio no mostraba los días sin ventas. Ahora usa el rango del filtro y corta en el momento actual.
 - **Versiones.** Brakeman advirtió que Rails 7.2 ya no tiene soporte, así que actualicé a Rails 8. Además, los runners de GitHub solo traen el último parche de Ruby 3.3, así que pasé de 3.3.7 a 3.3.13.
 
 ## Limitaciones conocidas
@@ -321,6 +332,7 @@ Problemas que encontré durante el desarrollo y cómo los resolví:
 - **Sin idempotencia en la creación.** Si un canal reintenta el mismo `POST`, se crea una orden duplicada.
 - **Mensajes de error en inglés**, que son los que trae Rails por defecto.
 - **La tienda simulada vive en la misma aplicación.**
+- **El gráfico de ventas en el tiempo agrupa en Ruby.** Es suficiente para este volumen; con más datos lo haría en SQL con `date_trunc`.
 
 ## Qué haría en producción
 
