@@ -16,4 +16,10 @@ Rails.application.routes.draw do
   end
 
   post "stores/:code/orders", to: "stores/orders#create", as: :store_orders
+
+  root "orders#index"
+
+  resources :orders, only: [ :index, :show ] do
+    post :redispatch, on: :member
+  end
 end

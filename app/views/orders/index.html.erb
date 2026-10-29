@@ -1,0 +1,70 @@
+<% content_for :head do %>
+  <meta http-equiv="refresh" content="15">
+<% end %>
+
+<h1>Órdenes</h1>
+
+<div class="stats">
+  <% Order.dispatch_statuses.each_key do |status| %>
+    <%= link_to orders_path(status: status), class: "stat stat-#{status}" do %>
+      <span class="stat-value"><%= @status_counts.fetch(status, 0) %></span>
+      <span class="stat-label"><%= dispatch_status_label(status) %></span>
+    <% end %>
+  <% end %>
+</div>
+
+<%= form_with url: orders_path, method: :get, class: "filters" do %>
+  <%= select_tag :status,
+        options_for_select(Order.dispatch_statuses.keys.map { |s| [dispatch_status_label(s), s] }, params[:status]),
+        include_blank: "Todos los estados" %>
+  <%= select_tag :restaurant_id,
+        options_from_collection_for_select(@restaurants, :id, :name, params[:restaurant_id]),
+        include_blank: "Todas las tiendas" %>
+  <%= submit_tag "Filtrar", name: nil %>
+  <%= link_to "Limpiar", orders_path %>
+<% end %>
+
+<section class="card">
+  <% if @orders.any? %>
+    <table>
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Tienda</th>
+          <th>Tipo</th>
+          <th class="num">Total</th>
+          <th>Creada</th>
+          <th>Despacho</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @orders.each do |order| %>
+          <tr>
+            <td><%= link_to "##{order.id}", order_path(order) %></td>
+            <td><%= order.restaurant.name %></td>
+            <td><%= order_type_label(order) %></td>
+            <td class="num"><%= clp(order.total_amount) %></td>
+            <td><%= format_time(order.created_at) %></td>
+            <td><%= dispatch_status_badge(order) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="empty">No hay órdenes para estos filtros.</p>
+  <% end %>
+</section>
+
+<nav class="pagination">
+  <span>
+    <% if @page > 1 %>
+      <%= link_to "← Anterior", orders_path(request.query_parameters.merge("page" => @page - 1)) %>
+    <% end %>
+  </span>
+  <span>Página <%= @page %></span>
+  <span>
+    <% if @next_page %>
+      <%= link_to "Siguiente →", orders_path(request.query_parameters.merge("page" => @page + 1)) %>
+    <% end %>
+  </span>
+</nav>
