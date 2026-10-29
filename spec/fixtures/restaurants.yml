@@ -1,0 +1,9 @@
+providencia:
+  code: PROV
+  name: Niu Foods Providencia
+  dispatch_url: http://store.test/stores/PROV/orders
+
+las_condes:
+  code: LCON
+  name: Niu Foods Las Condes
+  dispatch_url: http://store.test/stores/LCON/orders

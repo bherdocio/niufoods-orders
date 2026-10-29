@@ -45,3 +45,7 @@ group :test do
 end
 
 gem "sidekiq", "~> 8.0"
+
+gem "webmock", "~> 3.34", group: :test
+
+gem "rspec-rails", "~> 8.0", groups: [ :development, :test ]

@@ -4,7 +4,7 @@ require "uri"
 
 class OrderSimulator
   PRODUCT_IDS = (1..10).to_a.freeze
-  RESTAURANT_IDS = [1, 2, 3].freeze
+  RESTAURANT_IDS = [ 1, 2, 3 ].freeze
   CUSTOMERS = [
     { name: "Ana Pérez", phone: "+56912345678" },
     { name: "Juan Soto", phone: "+56987654321" },
@@ -63,9 +63,9 @@ class OrderSimulator
     when :delivery_without_address
       order.merge(order_type: "delivery").except(:delivery_address)
     when :zero_quantity
-      order.merge(items: [{ product_id: PRODUCT_IDS.sample, quantity: 0 }])
+      order.merge(items: [ { product_id: PRODUCT_IDS.sample, quantity: 0 } ])
     when :unknown_product
-      order.merge(items: [{ product_id: 999, quantity: 1 }])
+      order.merge(items: [ { product_id: 999, quantity: 1 } ])
     end
   end
 

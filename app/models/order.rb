@@ -7,7 +7,7 @@ class Order < ApplicationRecord
   enum :order_type, { pickup: 0, delivery: 1 }, validate: true
   enum :dispatch_status, { pending: 0, sent: 1, failed: 2 }
 
-  before_validation :calculate_total
+  before_validation :calculate_total, on: :create
 
   validates :customer_name, presence: true
   validates :customer_phone, format: { with: /\A\+?\d{8,15}\z/ }, allow_blank: true

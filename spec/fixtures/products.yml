@@ -1,0 +1,9 @@
+salmon_roll:
+  sku: SKU-001
+  name: Niu Roll Salmón
+  price: 8990
+
+gyozas:
+  sku: SKU-005
+  name: Gyozas de Pollo x5
+  price: 4490

@@ -2,7 +2,7 @@ class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :product
 
-  before_validation :assign_prices
+  before_validation :assign_prices, on: :create
 
   validates :quantity, numericality: { only_integer: true, greater_than: 0 }
   validates :unit_price, :subtotal, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
