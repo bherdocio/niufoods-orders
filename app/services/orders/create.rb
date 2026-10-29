@@ -10,7 +10,7 @@ module Orders
 
     def call
       order = build_order
-      enqueue_dispatch(order) if order.save
+      DispatchOrderJob.enqueue(order) if order.save
       order
     end
 
@@ -32,12 +32,6 @@ module Orders
       end
 
       order
-    end
-
-    def enqueue_dispatch(order)
-      DispatchOrderJob.perform_async(order.id)
-    rescue RedisClient::CannotConnectError => e
-      Rails.logger.error("No se pudo encolar el despacho de la orden #{order.id}: #{e.message}")
     end
   end
 end

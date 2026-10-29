@@ -1,0 +1,96 @@
+<% content_for :title, "Orden ##{@order.id}" %>
+
+<p><%= link_to "← Volver a órdenes", orders_path %></p>
+
+<div class="order-header">
+  <h1>Orden #<%= @order.id %> <%= dispatch_status_badge(@order) %></h1>
+  <% if @order.failed? %>
+    <%= button_to "Reintentar despacho", redispatch_order_path(@order), class: "button" %>
+  <% end %>
+</div>
+
+<section class="card">
+  <dl class="details">
+    <dt>Tienda</dt>
+    <dd><%= @order.restaurant.name %> (<%= @order.restaurant.code %>)</dd>
+    <dt>Tipo</dt>
+    <dd><%= order_type_label(@order) %></dd>
+    <dt>Cliente</dt>
+    <dd><%= @order.customer_name %></dd>
+    <dt>Teléfono</dt>
+    <dd><%= @order.customer_phone.presence || "—" %></dd>
+    <% if @order.delivery? %>
+      <dt>Dirección</dt>
+      <dd><%= @order.delivery_address %></dd>
+    <% end %>
+    <dt>Creada</dt>
+    <dd><%= format_time(@order.created_at) %></dd>
+    <dt>Despachada</dt>
+    <dd><%= format_time(@order.dispatched_at) %></dd>
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Productos</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>SKU</th>
+        <th class="num">Cantidad</th>
+        <th class="num">Precio unitario</th>
+        <th class="num">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @order.order_items.each do |item| %>
+        <tr>
+          <td><%= item.product.name %></td>
+          <td><%= item.product.sku %></td>
+          <td class="num"><%= item.quantity %></td>
+          <td class="num"><%= clp(item.unit_price) %></td>
+          <td class="num"><%= clp(item.subtotal) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4">Total</td>
+        <td class="num"><%= clp(@order.total_amount) %></td>
+      </tr>
+    </tfoot>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Intentos de despacho</h2>
+  <% if @attempts.any? %>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Resultado</th>
+          <th>HTTP</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @attempts.each_with_index do |attempt, index| %>
+          <tr>
+            <td><%= index + 1 %></td>
+            <td><%= format_time(attempt.created_at) %></td>
+            <td>
+              <%= content_tag(:span, attempt.success? ? "Éxito" : "Fallo",
+                    class: "badge badge-#{attempt.success? ? 'sent' : 'failed'}") %>
+            </td>
+            <td><%= attempt.response_status || "—" %></td>
+            <td class="error-text"><%= attempt.error_message.presence || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="empty">Aún no hay intentos de despacho.</p>
+  <% end %>
+</section>
