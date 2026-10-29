@@ -116,6 +116,20 @@ erDiagram
 - PostgreSQL 12 o superior (probado con 12.22)
 - Redis 7 o superior, requerido por Sidekiq 8 (probado con 8.0.6)
 
+## Inicio rápido
+
+```bash
+git clone git@github.com:bherdocio/niufoods-orders.git
+cd niufoods-orders
+bundle install
+bin/rails db:create db:migrate db:seed
+bin/rails server            # terminal 1
+bundle exec sidekiq         # terminal 2
+ruby script/simulate_orders.rb 20   # terminal 3
+```
+
+Luego abre <http://localhost:3000>. Si tu PostgreSQL no tiene el rol `niufoods`, revisa la sección Instalación.
+
 ## Instalación
 
 ```bash
@@ -129,6 +143,10 @@ Por defecto la app se conecta a PostgreSQL en `localhost:5432` con el usuario `n
 ```bash
 sudo -u postgres psql -c "CREATE ROLE niufoods SUPERUSER LOGIN PASSWORD 'niufoods';"
 ```
+
+En macOS con Homebrew no existe el usuario `postgres`; puedes usar tu propio usuario: `DB_USER=$(whoami) DB_PASSWORD= bin/rails db:create db:migrate db:seed` (exporta las mismas variables al levantar el servidor y Sidekiq).
+
+Si levantas el servidor en otro puerto, define `STORE_BASE_URL` (por ejemplo, `STORE_BASE_URL=http://localhost:4000`) antes de correr los seeds, porque ahí se guarda la URL de despacho de cada tienda.
 
 O usar tus propias credenciales con las variables `DB_HOST`, `DB_PORT`, `DB_USER` y `DB_PASSWORD`. Luego:
 
