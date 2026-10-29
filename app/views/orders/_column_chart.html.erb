@@ -1,0 +1,14 @@
+<% if rows.any? %>
+  <% max = rows.map { |row| row[:value] }.max %>
+  <% step = (rows.size / 12.0).ceil %>
+  <div class="column-chart">
+    <% rows.each_with_index do |row, index| %>
+      <div class="column" title="<%= row[:label] %>: <%= clp(row[:value]) %>">
+        <span class="column-track"><span class="column-fill" style="height: <%= bar_width(row[:value], max) %>%"></span></span>
+        <span class="column-label"><%= row[:label] if (index % step).zero? %></span>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p class="empty">Aún no hay datos.</p>
+<% end %>

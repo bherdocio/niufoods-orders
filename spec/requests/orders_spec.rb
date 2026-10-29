@@ -45,6 +45,15 @@ RSpec.describe "Dashboard de órdenes", type: :request do
   it "muestra los indicadores y gráficos de ventas" do
     get root_path
 
-    expect(response.body).to include("Ventas por tienda", "Productos más vendidos", "Ticket promedio")
+    expect(response.body).to include("Ventas en el tiempo", "Ventas por tienda", "Productos más vendidos", "Ticket promedio")
+  end
+
+  it "filtra el dashboard por fecha" do
+    order.update_columns(created_at: Time.zone.local(2026, 10, 1, 12))
+
+    get orders_path(from: "2026-10-20")
+
+    expect(response.body).not_to include(order_link)
+    expect(response.body).to include("Desde 20-10-2026")
   end
 end

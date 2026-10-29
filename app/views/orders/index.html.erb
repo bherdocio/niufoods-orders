@@ -1,12 +1,29 @@
 <% content_for :head do %>
-  <meta http-equiv="refresh" content="15">
+  <meta http-equiv="refresh" content="30">
 <% end %>
 
 <h1>Órdenes</h1>
 
+<%= form_with url: orders_path, method: :get, class: "filters" do %>
+  <%= label_tag :from, "Desde", class: "filter-label" %>
+  <%= date_field_tag :from, @filter.from %>
+  <%= label_tag :to, "Hasta", class: "filter-label" %>
+  <%= date_field_tag :to, @filter.to %>
+  <%= select_tag :restaurant_id,
+        options_from_collection_for_select(@restaurants, :id, :name, @filter.restaurant_id),
+        include_blank: "Todas las tiendas" %>
+  <%= select_tag :status,
+        options_for_select(Order.dispatch_statuses.keys.map { |s| [ dispatch_status_label(s), s ] }, @filter.status),
+        include_blank: "Todos los estados" %>
+  <%= submit_tag "Filtrar", name: nil %>
+  <%= link_to "Limpiar", orders_path %>
+<% end %>
+
+<p class="period"><%= period_description(@filter) %></p>
+
 <div class="stats">
   <% Order.dispatch_statuses.each_key do |status| %>
-    <%= link_to orders_path(status: status), class: "stat stat-#{status}" do %>
+    <%= link_to orders_path(request.query_parameters.except("page").merge("status" => status)), class: "stat stat-#{status}" do %>
       <span class="stat-value"><%= @status_counts.fetch(status, 0) %></span>
       <span class="stat-label"><%= dispatch_status_label(status) %></span>
     <% end %>
@@ -21,6 +38,12 @@
   </div>
 </div>
 
+<section class="card">
+  <h2>Ventas en el tiempo</h2>
+  <%= render "column_chart", rows: @stats.sales_over_time %>
+  <p class="chart-note">Por hora si el período abarca hasta 24 horas; por día si es mayor. Pasa el cursor sobre una barra para ver el monto.</p>
+</section>
+
 <div class="charts">
   <section class="card">
     <h2>Ventas por tienda</h2>
@@ -31,17 +54,6 @@
     <%= render "bar_chart", rows: product_chart_rows(@stats) %>
   </section>
 </div>
-
-<%= form_with url: orders_path, method: :get, class: "filters" do %>
-  <%= select_tag :status,
-        options_for_select(Order.dispatch_statuses.keys.map { |s| [dispatch_status_label(s), s] }, params[:status]),
-        include_blank: "Todos los estados" %>
-  <%= select_tag :restaurant_id,
-        options_from_collection_for_select(@restaurants, :id, :name, params[:restaurant_id]),
-        include_blank: "Todas las tiendas" %>
-  <%= submit_tag "Filtrar", name: nil %>
-  <%= link_to "Limpiar", orders_path %>
-<% end %>
 
 <section class="card">
   <% if @orders.any? %>

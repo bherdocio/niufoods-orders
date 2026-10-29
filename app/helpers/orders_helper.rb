@@ -41,4 +41,13 @@ module OrdersHelper
       { label: row[:label], value: row[:quantity], display: pluralize(row[:quantity], "unidad", plural: "unidades") }
     end
   end
+
+  def period_description(filter)
+    return "Todo el período" unless filter.from || filter.to
+
+    parts = []
+    parts << "desde #{filter.from.strftime('%d-%m-%Y')}" if filter.from
+    parts << "hasta #{filter.to.strftime('%d-%m-%Y')}" if filter.to
+    parts.join(" ").capitalize
+  end
 end

@@ -2,12 +2,18 @@ class OrdersController < ApplicationController
   PER_PAGE = 25
 
   def index
-    @stats = Orders::DashboardStats.new
+    @filter = Orders::DashboardFilter.new(params)
     @restaurants = Restaurant.order(:name)
-    @status_counts = Order.group(:dispatch_status).count
+    @stats = Orders::DashboardStats.new(@filter.base_scope, @filter.restaurants, from: @filter.from, to: @filter.to)
+    @status_counts = @stats.status_counts
     @page = [ params[:page].to_i, 1 ].max
 
-    orders = filtered_orders.offset((@page - 1) * PER_PAGE).limit(PER_PAGE + 1).to_a
+    orders = @filter.orders_scope
+                    .includes(:restaurant)
+                    .order(created_at: :desc, id: :desc)
+                    .offset((@page - 1) * PER_PAGE)
+                    .limit(PER_PAGE + 1)
+                    .to_a
     @next_page = orders.size > PER_PAGE
     @orders = orders.first(PER_PAGE)
   end
@@ -32,14 +38,5 @@ class OrdersController < ApplicationController
       order.update!(dispatch_status: :failed)
       redirect_to order_path(order), alert: "No se pudo encolar el despacho. Revisa que Redis esté disponible."
     end
-  end
-
-  private
-
-  def filtered_orders
-    scope = Order.includes(:restaurant).order(created_at: :desc, id: :desc)
-    scope = scope.where(dispatch_status: params[:status]) if Order.dispatch_statuses.key?(params[:status])
-    scope = scope.where(restaurant_id: params[:restaurant_id]) if params[:restaurant_id].present?
-    scope
   end
 end
