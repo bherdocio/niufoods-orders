@@ -10,7 +10,11 @@
   </head>
   <body>
     <header class="topbar">
-      <%= link_to "Niu Foods · Órdenes", root_path, class: "brand" %>
+      <%= link_to root_path, class: "brand" do %>
+        <span class="brand-dot"></span>
+        <span class="brand-name">Niu Foods</span>
+        <span class="brand-sub">Centro de órdenes</span>
+      <% end %>
     </header>
     <main class="container">
       <% if notice %><p class="flash flash-notice"><%= notice %></p><% end %>

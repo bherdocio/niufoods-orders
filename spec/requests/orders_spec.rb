@@ -41,4 +41,10 @@ RSpec.describe "Dashboard de órdenes", type: :request do
     expect(response).to redirect_to(order_path(order))
     expect(DispatchOrderJob.jobs).to be_empty
   end
+
+  it "muestra los indicadores y gráficos de ventas" do
+    get root_path
+
+    expect(response.body).to include("Ventas por tienda", "Productos más vendidos", "Ticket promedio")
+  end
 end

@@ -1,0 +1,14 @@
+<% if rows.any? %>
+  <% max = rows.map { |row| row[:value] }.max %>
+  <ul class="bar-chart">
+    <% rows.each do |row| %>
+      <li class="bar-row">
+        <span class="bar-label"><%= row[:label] %></span>
+        <span class="bar-track"><span class="bar-fill" style="width: <%= bar_width(row[:value], max) %>%"></span></span>
+        <span class="bar-value"><%= row[:display] %></span>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="empty">Aún no hay datos.</p>
+<% end %>

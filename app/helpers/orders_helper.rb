@@ -21,4 +21,24 @@ module OrdersHelper
   def format_time(time)
     time ? time.in_time_zone.strftime("%d-%m-%Y %H:%M:%S") : "—"
   end
+
+  def bar_width(value, max)
+    max.to_i.zero? ? 0 : (value * 100.0 / max).round(1)
+  end
+
+  def restaurant_chart_rows(stats)
+    stats.sales_by_restaurant.map do |row|
+      {
+        label: row[:label],
+        value: row[:amount],
+        display: "#{clp(row[:amount])} · #{pluralize(row[:count], 'orden', plural: 'órdenes')}"
+      }
+    end
+  end
+
+  def product_chart_rows(stats)
+    stats.top_products.map do |row|
+      { label: row[:label], value: row[:quantity], display: pluralize(row[:quantity], "unidad", plural: "unidades") }
+    end
+  end
 end

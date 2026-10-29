@@ -11,6 +11,25 @@
       <span class="stat-label"><%= dispatch_status_label(status) %></span>
     <% end %>
   <% end %>
+  <div class="stat stat-kpi">
+    <span class="stat-value"><%= clp(@stats.total_sales) %></span>
+    <span class="stat-label">Ventas totales</span>
+  </div>
+  <div class="stat stat-kpi">
+    <span class="stat-value"><%= clp(@stats.average_ticket) %></span>
+    <span class="stat-label">Ticket promedio</span>
+  </div>
+</div>
+
+<div class="charts">
+  <section class="card">
+    <h2>Ventas por tienda</h2>
+    <%= render "bar_chart", rows: restaurant_chart_rows(@stats) %>
+  </section>
+  <section class="card">
+    <h2>Productos más vendidos</h2>
+    <%= render "bar_chart", rows: product_chart_rows(@stats) %>
+  </section>
 </div>
 
 <%= form_with url: orders_path, method: :get, class: "filters" do %>

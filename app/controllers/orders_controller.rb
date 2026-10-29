@@ -2,6 +2,7 @@ class OrdersController < ApplicationController
   PER_PAGE = 25
 
   def index
+    @stats = Orders::DashboardStats.new
     @restaurants = Restaurant.order(:name)
     @status_counts = Order.group(:dispatch_status).count
     @page = [ params[:page].to_i, 1 ].max
