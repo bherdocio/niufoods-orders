@@ -44,7 +44,7 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem "sidekiq", "~> 8.0"
+gem "sidekiq", "~> 8.1"
 
 gem "webmock", "~> 3.34", group: :test
 
