@@ -46,6 +46,6 @@ end
 
 gem "sidekiq", "~> 8.0"
 
-gem "webmock", "~> 3.34", group: :test
+gem "webmock", "~> 3.36", group: :test
 
 gem "rspec-rails", "~> 8.0", groups: [ :development, :test ]
